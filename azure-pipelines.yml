@@ -1,0 +1,25 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: TerraformInstaller@1
+  displayName: 'Install Terraform'
+  inputs:
+    terraformVersion: '1.5.7'  # Specify the version you want
+
+- script: |
+    terraform init
+  displayName: 'Terraform Init'
+
+- script: |
+    terraform validate
+  displayName: 'Terraform Validate'
+
+- script: |
+    terraform plan -out=tfplan
+  displayName: 'Terraform Plan'
