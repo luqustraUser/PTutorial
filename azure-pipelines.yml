@@ -7,7 +7,7 @@ pool:
   name: default  # Uses the default agent pool
 
 variables:
-- group: Hub_Spoke  # Contains ARM_CLIENT_ID, etc.
+- group: Hub_Spoke  # Only keep this if it contains non-auth Terraform vars like TF_VAR_location, etc.
 
 stages:
 - stage: Terraform
@@ -23,10 +23,10 @@ stages:
         scriptType: 'pscore'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          # Print Terraform version
+          # Show Terraform version
           terraform version
 
-         # Run Terraform commands
+          # Run Terraform commands
           terraform init -reconfigure
           terraform plan
           terraform apply -auto-approve
