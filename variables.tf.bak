@@ -1,0 +1,20 @@
+variable "location" {
+  description = "Azure region where resources will be deployed"
+  default     = "AustraliaEast"
+}
+
+variable "username" {
+  description = "Admin username for virtual machines"
+  default     = "azureuser"
+}
+
+variable "password" {
+  description = "Admin password for virtual machines. Must meet Azure complexity requirements."
+  sensitive   = true
+  default     = null
+}
+
+variable "vmsize" {
+  description = "Size of the Azure virtual machines"
+  default     = "Standard_DS1_v2"
+}
