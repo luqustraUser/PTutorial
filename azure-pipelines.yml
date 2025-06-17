@@ -4,10 +4,7 @@ trigger:
       - main
 
 pool:
-  name: default  # Uses the default agent pool
-
-variables:
-- group: Hub_Spoke  # Only keep this if it contains non-auth Terraform vars like TF_VAR_location, etc.
+  name: default  # Your Azure DevOps agent pool
 
 stages:
 - stage: Terraform
@@ -16,17 +13,20 @@ stages:
     steps:
     - checkout: self
 
-    # Authenticate with Azure using service connection
     - task: AzureCLI@2
       inputs:
-        azureSubscription: 'AzureConnection-PTutorial'
+        azureSubscription: 'AzureConnection-PTutorial'  # Your service connection
         scriptType: 'pscore'
         scriptLocation: 'inlineScript'
         inlineScript: |
           # Show Terraform version
           terraform version
 
-          # Run Terraform commands
+          # Initialize Terraform (reads backend config from your .tf files)
           terraform init -reconfigure
+
+          # Run Terraform plan
           terraform plan
+
+          # Apply changes automatically
           terraform apply -auto-approve
