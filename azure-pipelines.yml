@@ -6,9 +6,6 @@ trigger:
 pool:
   name: default  # your agent pool
 
-variables:
-- group: YourVariableGroupName  # replace with your actual variable group containing ARM credentials
-
 stages:
 - stage: Terraform
   jobs:
@@ -45,9 +42,6 @@ stages:
         scriptType: 'ps'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          # Terraform init with backend reconfigure to avoid backend errors
           terraform init -reconfigure
-
           terraform plan
-
           terraform apply -auto-approve
