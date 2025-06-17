@@ -4,7 +4,10 @@ trigger:
       - main
 
 pool:
-  name: default  # Your Azure DevOps agent pool
+  name: default  # your agent pool
+
+variables:
+- group: YourVariableGroupName  # replace with your actual variable group containing ARM credentials
 
 stages:
 - stage: Terraform
@@ -13,20 +16,38 @@ stages:
     steps:
     - checkout: self
 
-    - task: AzureCLI@2
+    # Download and install Terraform 1.5.6
+    - task: PowerShell@2
+      displayName: 'Install Terraform 1.5.6'
       inputs:
-        azureSubscription: 'AzureConnection-PTutorial'  # Your service connection
+        targetType: 'inline'
+        script: |
+          Write-Host "Downloading Terraform 1.5.6"
+          Invoke-WebRequest -Uri https://releases.hashicorp.com/terraform/1.5.6/terraform_1.5.6_windows_amd64.zip -OutFile terraform.zip
+
+          $dest = "$Env:USERPROFILE\terraform"
+          if (-Not (Test-Path -Path $dest)) {
+            New-Item -ItemType Directory -Path $dest
+          }
+
+          Expand-Archive -Path terraform.zip -DestinationPath $dest -Force
+
+          # Add terraform to PATH for this session
+          $env:PATH = "$dest;$env:PATH"
+
+          terraform version
+
+    # Authenticate to Azure and run Terraform commands
+    - task: AzureCLI@2
+      displayName: 'Run Terraform'
+      inputs:
+        azureSubscription: 'AzureConnection-PTutorial'   # your service connection name
         scriptType: 'ps'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          # Show Terraform version
-          terraform version
-
-          # Initialize Terraform (reads backend config from your .tf files)
+          # Terraform init with backend reconfigure to avoid backend errors
           terraform init -reconfigure
 
-          # Run Terraform plan
           terraform plan
 
-          # Apply changes automatically
           terraform apply -auto-approve
