@@ -4,10 +4,10 @@ trigger:
       - main
 
 pool:
-  name: default  # Use your defined DevOps agent pool
+  name: default  # Uses the default agent pool
 
 variables:
-- group: TerraformSecrets  # Your secure values for Azure auth
+- group: Hub_Spoke  # Contains ARM_CLIENT_ID, etc.
 
 stages:
 - stage: Terraform
@@ -16,20 +16,23 @@ stages:
     steps:
     - checkout: self
 
-    - task: PowerShell@2
+    # Authenticate with Azure using service connection
+    - task: AzureCLI@2
       inputs:
-        targetType: 'inline'
-        script: |
-          # Confirm Terraform is pre-installed
+        azureSubscription: 'AzureConnection-PTutorial'
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          # Print Terraform version
           terraform version
 
-          # Set environment variables for Azure provider
+          # Set Azure authentication environment variables
           $env:ARM_CLIENT_ID       = "$(ARM_CLIENT_ID)"
           $env:ARM_CLIENT_SECRET   = "$(ARM_CLIENT_SECRET)"
           $env:ARM_TENANT_ID       = "$(ARM_TENANT_ID)"
           $env:ARM_SUBSCRIPTION_ID = "$(ARM_SUBSCRIPTION_ID)"
 
-          # Terraform commands from root directory
+          # Run Terraform commands
           terraform init -reconfigure
           terraform plan
           terraform apply -auto-approve
