@@ -19,7 +19,7 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          Write-Host "Downloading Terraform 1.5.6"
+          Write-Host "Downloading Terraform 1.5.6..."
           Invoke-WebRequest -Uri https://releases.hashicorp.com/terraform/1.5.6/terraform_1.5.6_windows_amd64.zip -OutFile terraform.zip
 
           $dest = "$Env:USERPROFILE\terraform"
@@ -28,20 +28,22 @@ stages:
           }
 
           Expand-Archive -Path terraform.zip -DestinationPath $dest -Force
+          Write-Host "Terraform extracted to $dest"
 
-          # Add terraform to PATH for this session
-          $env:PATH = "$dest;$env:PATH"
+          # Persist the path for use in next task
+          echo "##vso[task.setvariable variable=TerraformPath]$dest"
 
-          terraform version
-
-    # Authenticate to Azure and run Terraform commands
+    # Authenticate to Azure and run Terraform using installed binary
     - task: AzureCLI@2
-      displayName: 'Run Terraform'
+      displayName: 'Terraform Init, Plan, Apply'
       inputs:
-        azureSubscription: 'AzureConnection-PTutorial'   # your service connection name
+        azureSubscription: 'AzureConnection-PTutorial'   # your service connection
         scriptType: 'ps'
         scriptLocation: 'inlineScript'
         inlineScript: |
+          $env:PATH = "$(TerraformPath);$env:PATH"
+          cd "$(System.DefaultWorkingDirectory)"
+          terraform version
           terraform init -reconfigure
           terraform plan
           terraform apply -auto-approve
