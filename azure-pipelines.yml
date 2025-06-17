@@ -16,7 +16,7 @@ stages:
     - task: AzureCLI@2
       inputs:
         azureSubscription: 'AzureConnection-PTutorial'  # Your service connection
-        scriptType: 'pscore'
+        scriptType: 'ps'
         scriptLocation: 'inlineScript'
         inlineScript: |
           # Show Terraform version
