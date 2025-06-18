@@ -31,9 +31,11 @@ stages:
           terraform -version
 
     # Terraform Init/Plan/Apply
-    - task: PowerShell@2
+    - task: AzureCLI@2
       displayName: 'Terraform Init & Apply'
       inputs:
+        azureSubscription: 'AzureConnection-PTutorial'
+        scriptType: 'ps'
         targetType: 'inline'
         script: |
           $env:ARM_CLIENT_ID = "$(ARM_CLIENT_ID)"
