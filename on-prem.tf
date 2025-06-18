@@ -144,8 +144,8 @@ resource "azurerm_virtual_machine" "onprem_vm" {
 
   os_profile {
     computer_name  = "${local.prefix_onprem}-vm"
-    admin_username = var.username
-    admin_password = var.admin_password
+    admin_username = "azureuser"
+    admin_password = local.password
   }
 
   os_profile_linux_config {

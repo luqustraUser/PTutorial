@@ -15,9 +15,7 @@ variable "admin_password" {
   default     = null
 
   validation {
-    condition = (
-      var.admin_password == null || try(length(trimspace(var.admin_password)) >= 20, true)
-    )
+    condition     = var.admin_password == null || try(length(trimspace(var.admin_password)) >= 12, true)
     error_message = "If provided, the admin password must be at least 12 characters long."
   }
 }
