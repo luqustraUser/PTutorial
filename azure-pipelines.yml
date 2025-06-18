@@ -4,7 +4,7 @@ trigger:
       - main
 
 pool:
-  vmImage: 'windows-latest'
+  name: default
 
 stages:
 - stage: Terraform
@@ -13,36 +13,39 @@ stages:
     steps:
     - checkout: self
 
-    # Install Terraform 1.5.6
+    # Install Terraform 1.12.2
     - task: PowerShell@2
-      displayName: 'Install Terraform 1.5.6'
+      displayName: 'Install Terraform 1.12.2'
       inputs:
-        targetType: inline
+        targetType: 'inline'
         script: |
-          $ver = '1.5.6'
-          Write-Host "Downloading Terraform $ver..."
-          Invoke-WebRequest -Uri "https://releases.hashicorp.com/terraform/$ver/terraform_${ver}_windows_amd64.zip" -OutFile tf.zip
-          $dest = "$env:USERPROFILE\terraform"
-          if (-not (Test-Path $dest)) { New-Item -ItemType Directory -Path $dest | Out-Null }
-          Expand-Archive tf.zip -DestinationPath $dest -Force
-          Write-Host "##vso[task.setvariable variable=TF_PATH]$dest"
-          & "$dest\terraform.exe" -version
+          Write-Host "Downloading Terraform 1.12.2"
+          Invoke-WebRequest -Uri https://releases.hashicorp.com/terraform/1.12.2/terraform_1.12.2_windows_amd64.zip -OutFile terraform.zip
 
-    # Run Terraform using Azure service connection
+          $dest = "$Env:USERPROFILE\terraform"
+          if (-Not (Test-Path -Path $dest)) {
+            New-Item -ItemType Directory -Path $dest
+          }
+
+          Expand-Archive -Path terraform.zip -DestinationPath $dest -Force
+
+          # Add terraform to PATH for this session
+          $env:PATH = "$dest;$env:PATH"
+
+          terraform version
+
     - task: AzureCLI@2
-      displayName: 'Terraform Init / Plan / Apply'
+      displayName: 'Run Terraform'
       inputs:
-        azureSubscription: 'AzureConnection-PTutorial'   # <-- Your Azure service connection
-        scriptType: ps
-        scriptLocation: inlineScript
-        workingDirectory: '$(Build.SourcesDirectory)'    # <-- This is the GitHub repo root
+        azureSubscription: 'AzureConnection-PTutorial'
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
         inlineScript: |
-          $env:PATH = "$(TF_PATH);$env:PATH"
-          terraform -version
+          $env:ARM_CLIENT_ID       = $env:servicePrincipalId
+          $env:ARM_CLIENT_SECRET   = $env:servicePrincipalKey
+          $env:ARM_TENANT_ID       = $env:tenantId
+          $env:ARM_SUBSCRIPTION_ID = $env:subscriptionId
 
-          # Backend init
           terraform init -reconfigure
-
-          # Plan and Apply
-          terraform plan -out=tfplan
-          terraform apply -auto-approve tfplan
+          terraform plan
+          terraform apply -auto-approve
