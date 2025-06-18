@@ -9,13 +9,13 @@ variable "username" {
 }
 
 variable "admin_password" {
-  type      = string
-  default   = null
-  sensitive = true
-
+  description = "Admin password for the virtual machines"
+  type        = string
+  sensitive   = true
+  default     = null
   validation {
-    condition     = var.admin_password == null || length(var.admin_password) >= 12
-    error_message = "Admin password must be at least 12 characters if provided."
+    condition     = var.admin_password == null || can(length(var.admin_password)) && length(var.admin_password) >= 12
+    error_message = "If provided, the admin password must be at least 12 characters long."
   }
 }
 
