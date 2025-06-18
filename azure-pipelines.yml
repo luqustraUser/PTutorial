@@ -4,7 +4,7 @@ trigger:
       - main
 
 pool:
-  name: 'Default'  # Use your Azure DevOps agent pool name
+  name: 'Default'  # your agent pool
 
 stages:
 - stage: Terraform
@@ -13,7 +13,7 @@ stages:
     steps:
     - checkout: self
 
-    # Install Terraform
+    # Install Terraform 1.12.2
     - task: PowerShell@2
       displayName: 'Install Terraform 1.12.2'
       inputs:
@@ -34,14 +34,19 @@ stages:
 
           terraform version
 
-    # Run Terraform commands inside Azure CLI task with your service connection
+    # Run Terraform with explicit SP credentials
     - task: AzureCLI@2
       displayName: 'Terraform init, plan and apply'
       inputs:
-        azureSubscription: 'AzureConnection-PTutorial'  # Your Azure service connection name
-        scriptType: 'ps'  # PowerShell Core; use 'bash' if your agent supports bash
+        azureSubscription: 'AzureConnection-PTutorial'  # still needed to set context
+        scriptType: 'ps'
         scriptLocation: 'inlineScript'
         inlineScript: |
+          $env:ARM_CLIENT_ID = '$(ARM_CLIENT_ID)'
+          $env:ARM_CLIENT_SECRET = '$(ARM_CLIENT_SECRET)'
+          $env:ARM_TENANT_ID = '$(ARM_TENANT_ID)'
+          $env:ARM_SUBSCRIPTION_ID = '$(ARM_SUBSCRIPTION_ID)'
+
           terraform init -reconfigure
           terraform plan
           terraform apply -auto-approve
