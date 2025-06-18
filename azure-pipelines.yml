@@ -7,7 +7,7 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-- group: Hub-Spoke-Var-Grp  # Contains ARM_CLIENT_ID, ARM_CLIENT_SECRET, ARM_SUBSCRIPTION_ID, ARM_TENANT_ID
+- group: Hub-Spoke-Var-Grp  # ARM_CLIENT_ID, ARM_CLIENT_SECRET, etc.
 
 stages:
 - stage: Terraform
@@ -16,9 +16,8 @@ stages:
     displayName: 'Terraform Init, Plan, Apply'
     steps:
 
-    - checkout: self
+    - checkout: self  # This will checkout your GitHub repo into the agent
 
-    # Install Terraform 1.5.6
     - task: PowerShell@2
       displayName: 'Install Terraform 1.5.6'
       inputs:
@@ -28,28 +27,26 @@ stages:
           $url = "https://releases.hashicorp.com/terraform/$version/terraform_${version}_windows_amd64.zip"
           Invoke-WebRequest -Uri $url -OutFile "$env:USERPROFILE\terraform.zip"
           Expand-Archive -Path "$env:USERPROFILE\terraform.zip" -DestinationPath "$env:USERPROFILE\terraform" -Force
-          # Add terraform folder to PATH for this session
           $env:PATH = "$env:USERPROFILE\terraform;$env:PATH"
           terraform -version
 
-    # Terraform Init, Plan & Apply
     - task: AzureCLI@2
       displayName: 'Terraform Init & Apply'
       inputs:
         azureSubscription: 'AzureConnection-PTutorial'  # Your service connection name
         scriptType: 'ps'
-        targetType: 'inline'
-        script: |
-          # Set environment variables for Terraform Azure provider
+        scriptLocation: 'inlineScript'   # Important to specify for inline scripts!
+        inlineScript: |
+          # Set Terraform Azure environment variables
           $env:ARM_CLIENT_ID = "$(ARM_CLIENT_ID)"
           $env:ARM_CLIENT_SECRET = "$(ARM_CLIENT_SECRET)"
           $env:ARM_SUBSCRIPTION_ID = "$(ARM_SUBSCRIPTION_ID)"
           $env:ARM_TENANT_ID = "$(ARM_TENANT_ID)"
 
-          # Add terraform folder to PATH (because this task runs in a new process)
+          # Add terraform folder to PATH (new process so need to add again)
           $env:PATH = "$env:USERPROFILE\terraform;$env:PATH"
 
-          # Navigate to repo root
+          # Move to repo directory
           cd "$(System.DefaultWorkingDirectory)"
 
           terraform init -reconfigure
