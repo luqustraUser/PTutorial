@@ -131,7 +131,7 @@ resource "azurerm_virtual_machine" "onprem_vm" {
   storage_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
-    sku       = "20_04-lts"
+    sku       = "20_04-LTS"
     version   = "latest"
   }
 
@@ -165,7 +165,7 @@ resource "azurerm_public_ip" "onprem_vpn_gateway1_pip" {
   name                = "${local.prefix_onprem}-vpn-gateway1-pip"
   location            = azurerm_resource_group.onprem_vnet_rg.location
   resource_group_name = azurerm_resource_group.onprem_vnet_rg.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
   sku                 = "Standard"
 }
 

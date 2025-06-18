@@ -110,7 +110,7 @@ resource "azurerm_virtual_machine" "hub_vm" {
 
   os_profile {
     computer_name  = "${local.prefix_hub}-vm"
-    admin_username = var.username
+    admin_username = "azureuser"
     admin_password = var.admin_password
   }
 
@@ -130,7 +130,8 @@ resource "azurerm_public_ip" "hub_vpn_gateway1_pip" {
   name                = "hub-vpn-gateway1-pip"
   location            = azurerm_resource_group.hub_vnet_rg.location
   resource_group_name = azurerm_resource_group.hub_vnet_rg.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
 
 // ====================

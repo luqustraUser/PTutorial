@@ -63,7 +63,7 @@ resource "azurerm_virtual_machine" "hub_nva_vm" {
   storage_image_reference {
     publisher = "Canonical"
     offer     = "Ubuntu"
-    sku       = "16.04-LTS"
+    sku       = "20_04-lts"
     version   = "latest"
   }
 
