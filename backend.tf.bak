@@ -4,6 +4,12 @@ terraform {
     storage_account_name = "ptutorial123"
     container_name       = "ptstate"
     key                  = "terraform.tfstate"
+<<<<<<< HEAD
+    subscription_id      = "f7ebe6c1-5970-43d1-83d7-2a3ffdf07b74"  # Check this!
+  }
+}
+=======
     subscription_id      = "f7ebe6c1-5970-43d1-83d7-2a3ffdf07b74" # Check this!
   }
 }
+>>>>>>> b0157c8 (Fix password logic and update local variables)

@@ -8,8 +8,9 @@ variable "username" {
   default     = "azureuser"
 }
 
-variable "password" {
+variable "admin_password" {
   description = "Admin password for VM."
+  type        = string
   sensitive   = true
   default     = null
 }

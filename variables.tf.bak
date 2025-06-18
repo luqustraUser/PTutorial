@@ -8,10 +8,10 @@ variable "username" {
   default     = "azureuser"
 }
 
-variable "password" {
-  description = "Admin password for virtual machines. Must meet Azure complexity requirements."
+variable "admin_password" {
+  description = "Admin password for VM."
+  type        = string
   sensitive   = true
-  default     = null
 }
 
 variable "vmsize" {

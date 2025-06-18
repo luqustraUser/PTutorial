@@ -93,8 +93,8 @@ resource "azurerm_virtual_machine" "spoke2_vm" {
 
   os_profile {
     computer_name  = "${local.prefix_spoke2}-vm"
-    admin_username = var.username
-    admin_password = var.password
+    admin_username = "azuser"
+    admin_password = var.admin_password
   }
 
   os_profile_linux_config {
