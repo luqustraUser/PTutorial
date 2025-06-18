@@ -4,7 +4,7 @@ trigger:
       - main
 
 pool:
-  name: default  # Use your agent pool here
+  name: 'Default'  # Use your Azure DevOps agent pool name
 
 stages:
 - stage: Terraform
@@ -13,7 +13,7 @@ stages:
     steps:
     - checkout: self
 
-    # Install Terraform 1.12.2 (update version here if needed)
+    # Install Terraform
     - task: PowerShell@2
       displayName: 'Install Terraform 1.12.2'
       inputs:
@@ -24,7 +24,7 @@ stages:
 
           $dest = "$Env:USERPROFILE\terraform"
           if (-Not (Test-Path -Path $dest)) {
-            New-Item -ItemType Directory -Path $dest
+            New-Item -ItemType Directory -Path $dest | Out-Null
           }
 
           Expand-Archive -Path terraform.zip -DestinationPath $dest -Force
@@ -34,19 +34,14 @@ stages:
 
           terraform version
 
-    # Run terraform commands
+    # Run Terraform commands inside Azure CLI task with your service connection
     - task: AzureCLI@2
-      displayName: 'Terraform Init, Plan and Apply'
+      displayName: 'Terraform init, plan and apply'
       inputs:
-        azureSubscription: 'AzureConnection-PTutorial'   # your Azure service connection name
-        scriptType: 'ps'  # Use PowerShell Core
+        azureSubscription: 'AzureConnection-PTutorial'  # Your Azure service connection name
+        scriptType: 'ps'  # PowerShell Core; use 'bash' if your agent supports bash
         scriptLocation: 'inlineScript'
         inlineScript: |
-          # Initialize Terraform backend
           terraform init -reconfigure
-
-          # Generate the plan and save to tfplan
-          terraform plan -out=tfplan
-
-          # Apply the saved plan
-          terraform apply -auto-approve tfplan
+          terraform plan
+          terraform apply -auto-approve
