@@ -1,6 +1,7 @@
 # 🌐 Azure Hub-Spoke Infrastructure Deployment using Terraform
 
-This project automates the provisioning of a **Hub-and-Spoke network topology** in **Microsoft Azure** using **Terraform**. It includes secure networking, compute resources, and backend for CI/CD Network Virtual Appliances (NVAs).
+This project automates the provisioning of a **Hub-and-Spoke network topology** in **Microsoft Azure** using **Terraform**. It sets up a secure and scalable infrastructure including virtual networks, subnets, route tables, and virtual machines. The hub network acts as a central point of connectivity, while the spoke networks host workloads. The project also provisions Network Virtual Appliances (NVAs) for routing and security, and includes integration points for CI/CD pipelines. This setup is ideal for enterprises looking to manage network segmentation and centralized security at scale.
+
 
 ---
 
