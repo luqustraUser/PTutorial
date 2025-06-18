@@ -33,7 +33,7 @@ stages:
     - task: AzureCLI@2
       displayName: 'Terraform Init & Apply'
       inputs:
-        azureSubscription: 'AzureConnection-PTutorial'  # Your service connection name
+        azureSubscription: 'AzureConnection-PTutorial'  # The service connection name
         scriptType: 'ps'
         scriptLocation: 'inlineScript'   # Important to specify for inline scripts!
         inlineScript: |
