@@ -13,8 +13,11 @@ variable "admin_password" {
   type        = string
   sensitive   = true
   default     = null
+
   validation {
-    condition     = var.admin_password == null || can(length(var.admin_password)) && length(var.admin_password) >= 12
+    condition = (
+      var.admin_password == null || try(length(trimspace(var.admin_password)) >= 20, true)
+    )
     error_message = "If provided, the admin password must be at least 12 characters long."
   }
 }

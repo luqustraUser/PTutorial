@@ -33,5 +33,5 @@ resource "random_password" "password" {
 }
 
 locals {
-  password = var.admin_password != null ? var.admin_password : try(random_password.password[0].result, null)
+  password = var.admin_password != null ? var.admin_password : random_password.password[0].result
 }

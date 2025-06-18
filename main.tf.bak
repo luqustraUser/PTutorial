@@ -32,7 +32,6 @@ resource "random_password" "password" {
   special = true
 }
 
-# Use the provided password if available, otherwise use the generated one
 locals {
-  password = var.admin_password != null ? var.admin_password : random_password.password[0].result
+  password = var.admin_password != null ? var.admin_password : try(random_password.password[0].result, null)
 }
