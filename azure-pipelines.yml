@@ -19,37 +19,39 @@ stages:
     - checkout: self
 
     # Install Terraform 1.5.6
-    - powershell: |
-        $version = "1.5.6"
-        $terraformUrl = "https://releases.hashicorp.com/terraform/$version/terraform_${version}_windows_amd64.zip"
-        Invoke-WebRequest -Uri $terraformUrl -OutFile "terraform.zip"
-        Expand-Archive -Path "terraform.zip" -DestinationPath "$env:USERPROFILE\terraform" -Force
-        Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\terraform"
-        $env:PATH = "$env:USERPROFILE\terraform;$env:PATH"
-        terraform -version
+    - task: PowerShell@2
       displayName: 'Install Terraform 1.5.6'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $version = "1.5.6"
+          $url = "https://releases.hashicorp.com/terraform/$version/terraform_${version}_windows_amd64.zip"
+          Invoke-WebRequest -Uri $url -OutFile "$env:USERPROFILE\terraform.zip"
+          Expand-Archive -Path "$env:USERPROFILE\terraform.zip" -DestinationPath "$env:USERPROFILE\terraform" -Force
+          # Add terraform folder to PATH for this session
+          $env:PATH = "$env:USERPROFILE\terraform;$env:PATH"
+          terraform -version
 
-    # Terraform Init, Plan and Apply using Azure CLI
+    # Terraform Init, Plan & Apply
     - task: AzureCLI@2
       displayName: 'Terraform Init & Apply'
       inputs:
-        azureSubscription: 'AzureConnection-PTutorial'
+        azureSubscription: 'AzureConnection-PTutorial'  # Your service connection name
         scriptType: 'ps'
         targetType: 'inline'
         script: |
-          # Export environment variables for Terraform Azure Provider
+          # Set environment variables for Terraform Azure provider
           $env:ARM_CLIENT_ID = "$(ARM_CLIENT_ID)"
           $env:ARM_CLIENT_SECRET = "$(ARM_CLIENT_SECRET)"
           $env:ARM_SUBSCRIPTION_ID = "$(ARM_SUBSCRIPTION_ID)"
           $env:ARM_TENANT_ID = "$(ARM_TENANT_ID)"
 
-          # Move to working directory
-          cd "$(System.DefaultWorkingDirectory)"
-
-          # Ensure Terraform binary is found
+          # Add terraform folder to PATH (because this task runs in a new process)
           $env:PATH = "$env:USERPROFILE\terraform;$env:PATH"
 
-          # Terraform commands
+          # Navigate to repo root
+          cd "$(System.DefaultWorkingDirectory)"
+
           terraform init -reconfigure
           terraform plan -out=tfplan
           terraform apply -auto-approve tfplan
