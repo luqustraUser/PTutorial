@@ -1,6 +1,6 @@
 # 🌐 Azure Hub-Spoke Infrastructure Deployment using Terraform
 
-This project automates the provisioning of a **Hub-and-Spoke network topology** in **Microsoft Azure** using **Terraform**. It includes secure networking, compute resources, and like Network Virtual Appliances (NVAs).
+This project automates the provisioning of a **Hub-and-Spoke network topology** in **Microsoft Azure** using **Terraform**. It includes secure networking, compute resources, and backend for CI/CD Network Virtual Appliances (NVAs).
 
 ---
 
