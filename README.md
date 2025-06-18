@@ -57,6 +57,11 @@ Terraform uses the following logic for virtual machine passwords:
 git clone https://github.com/YOUR-USERNAME/PTutorial.git
 cd PTutorial (It depends where is your local folder is.)
 
+###
+🌍 Architecture Diagram
+
+
+
          +-----------------------+
          |        HUB VNet       |
          |  +-----------------+  |
