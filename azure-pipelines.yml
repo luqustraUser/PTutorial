@@ -4,7 +4,7 @@ trigger:
       - main
 
 pool:
-  name: default
+  vmImage: 'windows-latest'
 
 stages:
 - stage: Terraform
@@ -13,28 +13,36 @@ stages:
     steps:
     - checkout: self
 
+    # Install Terraform 1.5.6
     - task: PowerShell@2
       displayName: 'Install Terraform 1.5.6'
       inputs:
-        targetType: 'inline'
+        targetType: inline
         script: |
-          Invoke-WebRequest -Uri https://releases.hashicorp.com/terraform/1.5.6/terraform_1.5.6_windows_amd64.zip -OutFile terraform.zip
-          $dest = "$Env:USERPROFILE\terraform"
-          if (-Not (Test-Path -Path $dest)) {
-            New-Item -ItemType Directory -Path $dest
-          }
-          Expand-Archive -Path terraform.zip -DestinationPath $dest -Force
-          $env:PATH = "$dest;$env:PATH"
-          terraform version
+          $ver = '1.5.6'
+          Write-Host "Downloading Terraform $ver..."
+          Invoke-WebRequest -Uri "https://releases.hashicorp.com/terraform/$ver/terraform_${ver}_windows_amd64.zip" -OutFile tf.zip
+          $dest = "$env:USERPROFILE\terraform"
+          if (-not (Test-Path $dest)) { New-Item -ItemType Directory -Path $dest | Out-Null }
+          Expand-Archive tf.zip -DestinationPath $dest -Force
+          Write-Host "##vso[task.setvariable variable=TF_PATH]$dest"
+          & "$dest\terraform.exe" -version
 
+    # Run Terraform using Azure service connection
     - task: AzureCLI@2
-      displayName: 'Run Terraform'
+      displayName: 'Terraform Init / Plan / Apply'
       inputs:
-        azureSubscription: 'AzureConnection-PTutorial'
-        scriptType: 'ps'
-        scriptLocation: 'inlineScript'
+        azureSubscription: 'AzureConnection-PTutorial'   # <-- Your Azure service connection
+        scriptType: ps
+        scriptLocation: inlineScript
+        workingDirectory: '$(Build.SourcesDirectory)'    # <-- This is the GitHub repo root
         inlineScript: |
-          cd "$(System.DefaultWorkingDirectory)"
+          $env:PATH = "$(TF_PATH);$env:PATH"
+          terraform -version
+
+          # Backend init
           terraform init -reconfigure
-          terraform plan
-          terraform apply -auto-approve
+
+          # Plan and Apply
+          terraform plan -out=tfplan
+          terraform apply -auto-approve tfplan
