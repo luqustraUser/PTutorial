@@ -97,7 +97,7 @@ resource "azurerm_virtual_machine" "spoke1_vm" {
   storage_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
-    sku       = "20_04-lts"
+    sku       = "22.04 LTS"
     version   = "latest"
   }
 

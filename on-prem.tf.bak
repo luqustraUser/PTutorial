@@ -131,7 +131,7 @@ resource "azurerm_virtual_machine" "onprem_vm" {
   storage_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
-    sku       = "20_04-lts-gen2"
+    sku       = "22.04 LTS"
     version   = "latest"
   }
 

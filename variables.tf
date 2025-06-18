@@ -9,10 +9,14 @@ variable "username" {
 }
 
 variable "admin_password" {
-  description = "Admin password for VM."
-  type        = string
-  sensitive   = true
-  default     = null
+  type      = string
+  default   = null
+  sensitive = true
+
+  validation {
+    condition     = var.admin_password == null || length(var.admin_password) >= 12
+    error_message = "Admin password must be at least 12 characters if provided."
+  }
 }
 
 variable "vmsize" {

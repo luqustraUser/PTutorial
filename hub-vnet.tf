@@ -97,7 +97,7 @@ resource "azurerm_virtual_machine" "hub_vm" {
   storage_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
-    sku       = "16.04-LTS"
+    sku       = "22_04-LTS"
     version   = "latest"
   }
 
@@ -110,7 +110,7 @@ resource "azurerm_virtual_machine" "hub_vm" {
 
   os_profile {
     computer_name  = "${local.prefix_hub}-vm"
-    admin_username = "azureuser"
+    admin_username = var.username
     admin_password = var.admin_password
   }
 
