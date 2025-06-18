@@ -4,49 +4,45 @@ trigger:
       - main
 
 pool:
-  name: 'Default'  # your agent pool
+  vmImage: 'windows-latest'
+
+variables:
+- group: Hub-Spoke-Var-Grp  # Contains ARM_CLIENT_ID, ARM_CLIENT_SECRET, ARM_SUBSCRIPTION_ID, ARM_TENANT_ID
 
 stages:
 - stage: Terraform
   jobs:
-  - job: InitPlanApply
+  - job: TerraformJob
+    displayName: 'Terraform Init, Plan, Apply'
     steps:
+
     - checkout: self
 
-    # Install Terraform 1.12.2
+    # Install Terraform (if not already present in agent)
     - task: PowerShell@2
-      displayName: 'Install Terraform 1.12.2'
+      displayName: 'Install Terraform 1.5.6'
       inputs:
         targetType: 'inline'
         script: |
-          Write-Host "Downloading Terraform 1.12.2"
-          Invoke-WebRequest -Uri https://releases.hashicorp.com/terraform/1.12.2/terraform_1.12.2_windows_amd64.zip -OutFile terraform.zip
+          $version = "1.5.6"
+          Invoke-WebRequest -Uri "https://releases.hashicorp.com/terraform/$version/terraform_${version}_windows_amd64.zip" -OutFile "terraform.zip"
+          Expand-Archive -Path "terraform.zip" -DestinationPath "$env:USERPROFILE\terraform" -Force
+          $env:PATH = "$env:USERPROFILE\terraform;$env:PATH"
+          terraform -version
 
-          $dest = "$Env:USERPROFILE\terraform"
-          if (-Not (Test-Path -Path $dest)) {
-            New-Item -ItemType Directory -Path $dest | Out-Null
-          }
-
-          Expand-Archive -Path terraform.zip -DestinationPath $dest -Force
-
-          # Add terraform to PATH for this session
-          $env:PATH = "$dest;$env:PATH"
-
-          terraform version
-
-    # Run Terraform with explicit SP credentials
-    - task: AzureCLI@2
-      displayName: 'Terraform init, plan and apply'
+    # Terraform Init/Plan/Apply
+    - task: PowerShell@2
+      displayName: 'Terraform Init & Apply'
       inputs:
-        azureSubscription: 'AzureConnection-PTutorial'  # still needed to set context
-        scriptType: 'ps'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          $env:ARM_CLIENT_ID = '$(ARM_CLIENT_ID)'
-          $env:ARM_CLIENT_SECRET = '$(ARM_CLIENT_SECRET)'
-          $env:ARM_TENANT_ID = '$(ARM_TENANT_ID)'
-          $env:ARM_SUBSCRIPTION_ID = '$(ARM_SUBSCRIPTION_ID)'
+        targetType: 'inline'
+        script: |
+          $env:ARM_CLIENT_ID = "$(ARM_CLIENT_ID)"
+          $env:ARM_CLIENT_SECRET = "$(ARM_CLIENT_SECRET)"
+          $env:ARM_SUBSCRIPTION_ID = "$(ARM_SUBSCRIPTION_ID)"
+          $env:ARM_TENANT_ID = "$(ARM_TENANT_ID)"
+
+          cd "$(System.DefaultWorkingDirectory)"
 
           terraform init -reconfigure
-          terraform plan
-          terraform apply -auto-approve
+          terraform plan -out=tfplan
+          terraform apply -auto-approve tfplan
