@@ -4,6 +4,6 @@ terraform {
     storage_account_name = "ptutorial123"
     container_name       = "ptstate"
     key                  = "terraform.tfstate"
-    subscription_id      = "f7ebe6c1-5970-43d1-83d7-2a3ffdf07b74" # Check this!
+    subscription_id      = "b13f0293-708e-4b14-9ae7-a3a36e3dfa2a" # Check this!
   }
 }
